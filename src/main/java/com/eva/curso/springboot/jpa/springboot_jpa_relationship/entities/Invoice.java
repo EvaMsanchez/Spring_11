@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
@@ -21,6 +22,7 @@ public class Invoice
     // Relación: la primera parte de la anotación se refiere a la clase donde está anotada, muchas facturas pertenecen a un cliente
     // Crea el foreign key de forma automática, coge el nombre del atributo y añade id: client_id
     @ManyToOne
+    @JoinColumn(name = "client_id") // personalizar el nombre de la llave foránea(FK)
     private Client client;
 
     public Invoice() {}
