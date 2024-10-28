@@ -9,8 +9,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 @Entity
 @Table(name = "clients")
@@ -25,9 +27,15 @@ public class Client
 
     // Relación: la primera parte de la anotación se refiere a la clase donde está anotada, un cliente puede tener muchas direcciones
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "client_id") // personalizar el nombre de la llave foránea(FK), se coloca en la tabla de muchos
-    /* Sin el JoinColumn: se crea automáticamente una tabla independiente entre ambas (igual que cuando es una relación muchos a muchos), 
-    hay que indicar para que esto no suceda y se cree FK en la tabla correspondiente */
+    //@JoinColumn(name = "client_id") // personalizar el nombre de la llave foránea(FK), se coloca en la tabla de muchos
+    /* SIN el JoinColumn: se crea automáticamente una TABLA INTERMEDIA entre ambas (igual que cuando es una relación muchos a muchos), 
+    de lo contrario hay que indicar para que esto no suceda y se cree FK en la tabla correspondiente */
+
+    @JoinTable(
+        name = "tbl_clientes_to_direcciones", 
+        joinColumns = @JoinColumn(name = "id_cliente"),
+        inverseJoinColumns = @JoinColumn(name = "id_direcciones"),
+        uniqueConstraints = @UniqueConstraint(columnNames = {"id_direcciones"}))
     private List<Address> addresses = new ArrayList<>(); // inicializar la lista
 
 
