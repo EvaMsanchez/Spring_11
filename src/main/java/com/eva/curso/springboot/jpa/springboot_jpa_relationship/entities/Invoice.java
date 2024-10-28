@@ -25,6 +25,7 @@ public class Invoice
     @JoinColumn(name = "client_id") // personalizar el nombre de la llave foránea(FK)
     private Client client;
 
+    
     public Invoice() {}
 
     public Invoice(String description, Long total) {
