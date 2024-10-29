@@ -34,12 +34,96 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner
 
 	@Override
 	public void run(String... args) throws Exception {
-		oneToManyInvoiceBidireccionalFindByIdClient();
+		removeInvoiceBidireccional();
 	}
 
 
 	/* Relación bidireccional 
-	Crar cliente, crear las facturas, al cliente le añadimos las facturas pero a cada factura también hay que añadirle cada cliente y 
+	Eliminar un objeto dependiente o hijo en relación OneToMany 
+	Creando el cliente */
+	@Transactional
+	public void removeInvoiceBidireccional()
+	{
+		Client client = new Client("Fran", "Moras");
+
+		Invoice invoice1 = new Invoice("compras de la casa", 5000L);
+		Invoice invoice2 = new Invoice("compras de oficina", 8000L);
+
+		Set<Invoice> invoices = new HashSet<>();
+		invoices.add(invoice1);
+		invoices.add(invoice2);
+		client.setInvoices(invoices);
+
+		// Como es una relación bidireccional a las facturas también hay que añadirles el cliente antes de guardarlas
+		invoice1.setClient(client);
+		invoice2.setClient(client);
+
+		clientRepository.save(client);
+
+		System.out.println(client);
+
+		// Buscamos el cliente
+		Optional<Client> optionalClientDb = clientRepository.findOne(3L);
+
+		optionalClientDb.ifPresent(clientDb -> {
+			Optional<Invoice> invoiceOptional = invoiceRepository.findById(1L); // Ahora buscamos la factura
+			
+			invoiceOptional.ifPresent(invoice -> {
+				clientDb.getInvoices().remove(invoice); // Eliminamos la factura
+				invoice.setClient(null); // Y eliminamos el cliente de esa factura
+
+				clientRepository.save(clientDb); // Se guarda el cliente
+				System.out.println(clientDb);
+			});
+		});
+	}
+
+
+	/* Relación bidireccional 
+	Eliminar un objeto dependiente o hijo en relación OneToMany 
+	Pero en vez de crear un cliente, realizar una búsqueda por el id */
+	@Transactional
+	public void removeInvoiceBidireccionalFindByIdClient()
+	{
+		Optional<Client> optionalClient = clientRepository.findOne(1L);
+
+		optionalClient.ifPresent(client -> {
+			Invoice invoice1 = new Invoice("compras de la casa", 5000L);
+			Invoice invoice2 = new Invoice("compras de oficina", 8000L);
+	
+			Set<Invoice> invoices = new HashSet<>();
+			invoices.add(invoice1);
+			invoices.add(invoice2);
+			client.setInvoices(invoices);
+	
+			// Como es una relación bidireccional a las facturas también hay que añadirles el cliente antes de guardarlas
+			invoice1.setClient(client);
+			invoice2.setClient(client);
+	
+			clientRepository.save(client);
+	
+			System.out.println(client);
+		});
+
+		// Buscamos el cliente
+		Optional<Client> optionalClientDb = clientRepository.findOne(1L);
+
+		optionalClientDb.ifPresent(client -> {
+			Optional<Invoice> invoiceOptional = invoiceRepository.findById(2L); // Ahora buscamos la factura
+			
+			invoiceOptional.ifPresent(invoice -> {
+				client.getInvoices().remove(invoice); // Eliminamos la factura
+				invoice.setClient(null); // Y eliminamos el cliente de esa factura
+
+				clientRepository.save(client); // Se guarda el cliente
+				System.out.println(client);
+			});
+		});
+	}
+
+
+	/* Relación bidireccional 
+	Crear cliente, crear las facturas, al cliente le añadimos las facturas pero a cada factura también hay que añadirle cada cliente y 
 	luego guardamos el cliente */
 	@Transactional
 	public void oneToManyInvoiceBidireccional()
