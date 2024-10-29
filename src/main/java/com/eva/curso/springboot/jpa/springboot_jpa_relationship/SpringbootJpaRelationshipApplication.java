@@ -33,12 +33,74 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner
 
 	@Override
 	public void run(String... args) throws Exception {
-		oneToManyFindByIdClient();
+		removeAddressFindByIdClient();
 	}
 
 
-	// Crear un cliente, crear las direcciones y agregarlas al cliente, a continuación al guardar el cliente se guardan automáticamente también las direcciones
-	// No hay que guardar las direcciones antes porque con "cascade" realiza el proceso de guardarlas automáticamente al guardar el cliente
+	/* Eliminar un objeto dependiente o hijo
+	Crear un cliente, crear las direcciones, añadir las direcciones al cliente y guardar el cliente, automáticamente se guardarán
+	también las direcciones. Lo siguiente buscar el cliente por id y eliminar una dirección específica */ 
+	@Transactional
+	public void removeAddress()
+	{
+		Client client = new Client("Fran", "Moras");
+		
+		Address address1 = new Address("El verjel", 1234);
+		Address address2 = new Address("Vasco de Gama", 9875);
+
+		client.getAddresses().add(address1);
+		client.getAddresses().add(address2);
+
+		clientRepository.save(client);
+
+		System.out.println(client);
+
+		Optional<Client> optionalClient = clientRepository.findById(3L);
+		optionalClient.ifPresent(c -> {
+			/* En este caso como no es app web, para que se pueda eliminar un objeto mediante un criterio de búsqueda, por id, 
+			hay que crear en la clase entity los métodos hasCode() and equals() */ 
+			c.getAddresses().remove(address1); 
+			clientRepository.save(c);
+			System.out.println(c);
+		});
+	}
+
+
+	/* Eliminar un objeto dependiente o hijo
+	Buscar un cliente por el id, crear las direcciones, añadir las direcciones al cliente y guardar el cliente, automáticamente se guardarán
+	también las direcciones. Lo siguiente buscar el cliente por id y eliminar una dirección específica */
+	@Transactional
+	public void removeAddressFindByIdClient()
+	{
+		Optional<Client> optionalClient = clientRepository.findById(2L);
+
+		optionalClient.ifPresent(client -> {
+			Address address1 = new Address("El verjel", 1234);
+			Address address2 = new Address("Vasco de Gama", 9875);
+
+			client.setAddresses(Arrays.asList(address1, address2));
+
+			clientRepository.save(client); // actualiza el cliente con las dos direcciones
+
+			System.out.println(client);
+
+			//Optional<Client> optionalClient2 = clientRepository.findById(2L);
+			// Para buscar no solo el cliente, sino tambien las direcciones del cliente, para app no web, de terminal o escritorio
+			Optional<Client> optionalClient2 = clientRepository.findOne(2L); 
+			optionalClient2.ifPresent(c -> {
+				/* En este caso como no es app web, para que se pueda eliminar un objeto mediante un criterio de búsqueda, por id, 
+				hay que crear en la clase entity los métodos hasCode() and equals() */ 
+				c.getAddresses().remove(address2); 
+				clientRepository.save(c);
+				System.out.println(c);
+			});
+		});
+	}
+
+
+	/* Crear un cliente, crear las direcciones y agregarlas al cliente, a continuación al guardar el cliente se guardan automáticamente 
+	también las direcciones. 
+	No hay que guardar las direcciones antes porque con "cascade" realiza el proceso de guardarlas automáticamente al guardar el cliente */ 
 	@Transactional
 	public void oneToMany()
 	{
@@ -56,8 +118,9 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner
 	}
 
 
-	// Crear un cliente, crear las direcciones y agregarlas al cliente, a continuación al guardar el cliente se guardan automáticamente también las direcciones
-	// No hay que guardar las direcciones antes porque con "cascade" realiza el proceso de guardarlas automáticamente al guardar el cliente
+	/* Buscar un cliente por el id, crear las direcciones y agregarlas al cliente, a continuación al guardar el cliente se guardan automáticamente 
+	también las direcciones.
+	No hay que guardar las direcciones antes porque con "cascade" realiza el proceso de guardarlas automáticamente al guardar el cliente */ 
 	@Transactional
 	public void oneToManyFindByIdClient()
 	{
