@@ -1,6 +1,7 @@
 package com.eva.curso.springboot.jpa.springboot_jpa_relationship;
 
-import java.util.Arrays;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,11 +34,64 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner
 
 	@Override
 	public void run(String... args) throws Exception {
-		removeAddressFindByIdClient();
+		oneToManyInvoiceBidireccionalFindByIdClient();
 	}
 
 
-	/* Eliminar un objeto dependiente o hijo
+	/* Relación bidireccional 
+	Crar cliente, crear las facturas, al cliente le añadimos las facturas pero a cada factura también hay que añadirle cada cliente y 
+	luego guardamos el cliente */
+	@Transactional
+	public void oneToManyInvoiceBidireccional()
+	{
+		Client client = new Client("Fran", "Moras");
+
+		Invoice invoice1 = new Invoice("compras de la casa", 5000L);
+		Invoice invoice2 = new Invoice("compras de oficina", 8000L);
+
+		Set<Invoice> invoices = new HashSet<>();
+		invoices.add(invoice1);
+		invoices.add(invoice2);
+		client.setInvoices(invoices);
+
+		// Como es una relación bidireccional a las facturas también hay que añadirles el cliente antes de guardarlas
+		invoice1.setClient(client);
+		invoice2.setClient(client);
+
+		clientRepository.save(client);
+
+		System.out.println(client);
+	}
+
+
+	/* Relación bidireccional 
+	Pero en vez de crear un cliente, realizar una búsqueda por el id */
+	@Transactional
+	public void oneToManyInvoiceBidireccionalFindByIdClient()
+	{
+		Optional<Client> optionalClient = clientRepository.findOne(1L);
+
+		optionalClient.ifPresent(client -> {
+			Invoice invoice1 = new Invoice("compras de la casa", 5000L);
+			Invoice invoice2 = new Invoice("compras de oficina", 8000L);
+	
+			Set<Invoice> invoices = new HashSet<>();
+			invoices.add(invoice1);
+			invoices.add(invoice2);
+			client.setInvoices(invoices);
+	
+			// Como es una relación bidireccional a las facturas también hay que añadirles el cliente antes de guardarlas
+			invoice1.setClient(client);
+			invoice2.setClient(client);
+	
+			clientRepository.save(client);
+	
+			System.out.println(client);
+		});
+	}
+
+
+	/* Eliminar un objeto dependiente o hijo en relación OneToMany
 	Crear un cliente, crear las direcciones, añadir las direcciones al cliente y guardar el cliente, automáticamente se guardarán
 	también las direcciones. Lo siguiente buscar el cliente por id y eliminar una dirección específica */ 
 	@Transactional
@@ -66,7 +120,7 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner
 	}
 
 
-	/* Eliminar un objeto dependiente o hijo
+	/* Eliminar un objeto dependiente o hijo en relación OneToMany
 	Buscar un cliente por el id, crear las direcciones, añadir las direcciones al cliente y guardar el cliente, automáticamente se guardarán
 	también las direcciones. Lo siguiente buscar el cliente por id y eliminar una dirección específica */
 	@Transactional
@@ -78,7 +132,10 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner
 			Address address1 = new Address("El verjel", 1234);
 			Address address2 = new Address("Vasco de Gama", 9875);
 
-			client.setAddresses(Arrays.asList(address1, address2));
+			Set<Address> addresses = new HashSet<>();
+			addresses.add(address1);
+			addresses.add(address2);
+			client.setAddresses(addresses);
 
 			clientRepository.save(client); // actualiza el cliente con las dos direcciones
 
@@ -86,7 +143,7 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner
 
 			//Optional<Client> optionalClient2 = clientRepository.findById(2L);
 			// Para buscar no solo el cliente, sino tambien las direcciones del cliente, para app no web, de terminal o escritorio
-			Optional<Client> optionalClient2 = clientRepository.findOne(2L); 
+			Optional<Client> optionalClient2 = clientRepository.findOneWithAddresses(2L); 
 			optionalClient2.ifPresent(c -> {
 				/* En este caso como no es app web, para que se pueda eliminar un objeto mediante un criterio de búsqueda, por id, 
 				hay que crear en la clase entity los métodos hasCode() and equals() */ 
@@ -130,7 +187,10 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner
 			Address address1 = new Address("El verjel", 1234);
 			Address address2 = new Address("Vasco de Gama", 9875);
 
-			client.setAddresses(Arrays.asList(address1, address2));
+			Set<Address> addresses = new HashSet<>();
+			addresses.add(address1);
+			addresses.add(address2);
+			client.setAddresses(addresses);
 
 			clientRepository.save(client); // actualiza el cliente con las dos direcciones
 

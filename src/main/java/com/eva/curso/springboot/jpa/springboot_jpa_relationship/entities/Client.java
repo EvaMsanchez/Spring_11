@@ -1,7 +1,7 @@
 package com.eva.curso.springboot.jpa.springboot_jpa_relationship.entities;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -25,18 +25,21 @@ public class Client
     private String name;
     private String lastname;
 
-    // Relación: la primera parte de la anotación se refiere a la clase donde está anotada, un cliente puede tener muchas direcciones
+    // Relación con direcciones: la primera parte de la anotación se refiere a la clase donde está anotada, un cliente puede tener muchas direcciones
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     //@JoinColumn(name = "client_id") // personalizar el nombre de la llave foránea(FK), se coloca en la tabla de muchos
     /* SIN el JoinColumn: se crea automáticamente una TABLA INTERMEDIA entre ambas (igual que cuando es una relación muchos a muchos), 
     de lo contrario hay que indicar para que esto no suceda y se cree FK en la tabla correspondiente */
-
     @JoinTable(
         name = "tbl_clientes_to_direcciones", 
         joinColumns = @JoinColumn(name = "id_cliente"),
         inverseJoinColumns = @JoinColumn(name = "id_direcciones"),
         uniqueConstraints = @UniqueConstraint(columnNames = {"id_direcciones"}))
-    private List<Address> addresses = new ArrayList<>(); // inicializar la lista
+    private Set<Address> addresses = new HashSet<>(); // inicializar la lista
+
+    // Relación con facturas: un cliente puede tener muchas facturas
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "client") // mappedBy= se indica el atributo de la otra clase con la que se relaciona (donde está el JoinColumns)
+    private Set<Invoice> invoices = new HashSet<>();
 
 
     public Client() {}
@@ -65,16 +68,35 @@ public class Client
     public void setLastname(String lastname) {
         this.lastname = lastname;
     }
-    public List<Address> getAddresses() {
+    public Set<Address> getAddresses() {
         return addresses;
     }
-    public void setAddresses(List<Address> addresses) {
+    public void setAddresses(Set<Address> addresses) {
         this.addresses = addresses;
     }
+    public Set<Invoice> getInvoices() {
+        return invoices;
+    }
+    public void setInvoices(Set<Invoice> invoices) {
+        this.invoices = invoices;
+    }
+
+    /* Método opcional
+    public void addInvoice(Invoice invoice)
+    {
+        invoices.add(invoice);
+        invoice.setClient(this);
+    } 
+    */
 
     @Override
     public String toString() {
-        return "{id=" + id + ", name=" + name + ", lastname=" + lastname + ", addresses=" + addresses + "}";
+        return "{id=" + id + 
+                ", name=" + name + 
+                ", lastname=" + lastname + 
+                ", invoices=" + invoices +
+                ", addresses=" + addresses + 
+                "}";
     }
     
 }

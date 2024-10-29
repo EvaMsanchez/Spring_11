@@ -22,6 +22,7 @@ public class Invoice
     // Relación: la primera parte de la anotación se refiere a la clase donde está anotada, muchas facturas pertenecen a un cliente
     // Crea el foreign key de forma automática, coge el nombre del atributo y añade id: client_id
     @ManyToOne
+    // Dueño de la relación porque es donde va la FK, en el otro lado, la tabla Client se indica el atributo de esta clase con la que se relaciona
     @JoinColumn(name = "client_id") // personalizar el nombre de la llave foránea(FK)
     private Client client;
 
@@ -61,7 +62,9 @@ public class Invoice
     
     @Override
     public String toString() {
-        return "{id=" + id + ", description=" + description + ", total=" + total + ", client=" + client + "}";
+        return "{id=" + id + 
+                ", description=" + description + 
+                ", total=" + total + "}";
     }
     
 }
