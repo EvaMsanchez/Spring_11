@@ -42,8 +42,8 @@ public class Client
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "client") // mappedBy= se indica el atributo de la otra clase con la que se relaciona (donde está el JoinColumns)
     private Set<Invoice> invoices = new HashSet<>();
 
-    @OneToOne
-    @JoinColumn(name = "id_cliente_detalle")
+    // Clase padre
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "client")
     private ClientDetails clientDetails;
 
 

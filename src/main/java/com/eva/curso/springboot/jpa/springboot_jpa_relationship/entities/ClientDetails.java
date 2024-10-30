@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
@@ -18,7 +19,10 @@ public class ClientDetails
     private boolean premiun;
     private Integer points;
 
-   
+    // Clase hija o dependiente, donde va la FK
+    @OneToOne
+    @JoinColumn(name = "id_cliente") // Dueña de la relación, aquí en detalles va la FK de cliente
+    private Client client;
 
 
     public ClientDetails() {}
@@ -46,6 +50,12 @@ public class ClientDetails
     }
     public void setPoints(Integer points) {
         this.points = points;
+    }
+    public Client getClient() {
+        return client;
+    }
+    public void setClient(Client client) {
+        this.client = client;
     }
 
     @Override
