@@ -12,7 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.eva.curso.springboot.jpa.springboot_jpa_relationship.entities.Address;
 import com.eva.curso.springboot.jpa.springboot_jpa_relationship.entities.Client;
+import com.eva.curso.springboot.jpa.springboot_jpa_relationship.entities.ClientDetails;
 import com.eva.curso.springboot.jpa.springboot_jpa_relationship.entities.Invoice;
+import com.eva.curso.springboot.jpa.springboot_jpa_relationship.repositories.ClientDetailsRepository;
 import com.eva.curso.springboot.jpa.springboot_jpa_relationship.repositories.ClientRepository;
 import com.eva.curso.springboot.jpa.springboot_jpa_relationship.repositories.InvoiceRepository;
 
@@ -26,6 +28,9 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner
 	@Autowired
 	private InvoiceRepository invoiceRepository;
 
+	@Autowired
+	private ClientDetailsRepository clientDetailsRepository;
+
 
 	public static void main(String[] args) {
 		SpringApplication.run(SpringbootJpaRelationshipApplication.class, args);
@@ -34,7 +39,41 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner
 
 	@Override
 	public void run(String... args) throws Exception {
-		removeInvoiceBidireccional();
+		oneToOneFindById();
+	}
+
+
+	// Relación ONE TO ONE
+	// Crear y guardar detalles de un cliente, crear un cliente, a continuación asignar el cliente el detalle y guardar el cliente
+	@Transactional
+	public void oneToOne()
+	{
+		ClientDetails clientDetails = new ClientDetails(true, 5000);
+		clientDetailsRepository.save(clientDetails);
+
+		Client client = new Client("Erba", "Pura");
+		client.setClientDetails(clientDetails);
+		clientRepository.save(client);
+
+		System.out.println(client);
+	}
+
+
+	// Relación ONE TO ONE
+	// Pero realizando la búsqueda del cliente por id, crear y guardar detalles de un cliente, a continuación buscamos el cliente, asignamos el detalle y guardar el cliente
+	@Transactional
+	public void oneToOneFindById()
+	{
+		ClientDetails clientDetails = new ClientDetails(true, 5000);
+		clientDetailsRepository.save(clientDetails);
+
+		Optional<Client> optionalClient = clientRepository.findOne(2L); // new Client("Erba", "Pura");
+		optionalClient.ifPresent(client -> {
+			client.setClientDetails(clientDetails);
+			clientRepository.save(client);
+	
+			System.out.println(client);
+		});
 	}
 
 

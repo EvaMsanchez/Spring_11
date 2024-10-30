@@ -19,6 +19,6 @@ public interface ClientRepository extends CrudRepository<Client, Long>
 
     /* Consulta personalizada para buscar un cliente por id junto con sus facturas y direcciones, para que al obtener un optional
     ya el cliente tenga las facturas y direcciones y se puedan añadir las factura sino hace proxy, al no llevar las facturas el cliente */ 
-    @Query("select c from Client c left join fetch c.invoices left join fetch c.addresses where c.id= ?1")
+    @Query("select c from Client c left join fetch c.invoices left join fetch c.addresses left join fetch c.clientDetails where c.id= ?1")
     Optional<Client> findOne(Long id);
 }

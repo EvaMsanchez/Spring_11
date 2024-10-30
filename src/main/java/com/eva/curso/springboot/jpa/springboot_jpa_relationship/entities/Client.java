@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
@@ -40,6 +41,10 @@ public class Client
     // Relación con facturas: un cliente puede tener muchas facturas
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "client") // mappedBy= se indica el atributo de la otra clase con la que se relaciona (donde está el JoinColumns)
     private Set<Invoice> invoices = new HashSet<>();
+
+    @OneToOne
+    @JoinColumn(name = "id_cliente_detalle")
+    private ClientDetails clientDetails;
 
 
     public Client() {}
@@ -80,6 +85,12 @@ public class Client
     public void setInvoices(Set<Invoice> invoices) {
         this.invoices = invoices;
     }
+    public ClientDetails getClientDetails() {
+        return clientDetails;
+    }
+    public void setClientDetails(ClientDetails clientDetails) {
+        this.clientDetails = clientDetails;
+    }
 
     /* Método opcional
     public void addInvoice(Invoice invoice)
@@ -96,6 +107,7 @@ public class Client
                 ", lastname=" + lastname + 
                 ", invoices=" + invoices +
                 ", addresses=" + addresses + 
+                ", clientDetails=" + clientDetails + 
                 "}";
     }
     
