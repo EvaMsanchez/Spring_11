@@ -19,6 +19,7 @@ import com.eva.curso.springboot.jpa.springboot_jpa_relationship.entities.Invoice
 import com.eva.curso.springboot.jpa.springboot_jpa_relationship.entities.Student;
 import com.eva.curso.springboot.jpa.springboot_jpa_relationship.repositories.ClientDetailsRepository;
 import com.eva.curso.springboot.jpa.springboot_jpa_relationship.repositories.ClientRepository;
+import com.eva.curso.springboot.jpa.springboot_jpa_relationship.repositories.CourseRepository;
 import com.eva.curso.springboot.jpa.springboot_jpa_relationship.repositories.InvoiceRepository;
 import com.eva.curso.springboot.jpa.springboot_jpa_relationship.repositories.StudentRepository;
 
@@ -38,6 +39,9 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner
 	@Autowired
 	private StudentRepository studentRepository;
 
+	@Autowired
+	private CourseRepository courseRepository;
+
 
 	public static void main(String[] args) {
 		SpringApplication.run(SpringbootJpaRelationshipApplication.class, args);
@@ -46,12 +50,95 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner
 
 	@Override
 	public void run(String... args) throws Exception {
-		manyToMany();
+		manyToManyRemove();
+	}
+
+
+	// Eliminar un objeto dependiente o hijo en relación MANY TO MANY
+	// Crear estudiantes y cursos, a continuación asignar al estudiante los cursos y guardar estudiantes
+	@Transactional
+	public void manyToManyRemove()
+	{
+		Student student1 = new Student("Jano", "Pura");
+		Student student2 = new Student("Erba", "Doe");
+
+		Course course1 = new Course("Curso de java master", "Andrés");
+		Course course2 = new Course("Curso de Spring Boot", "Andrés");
+
+		student1.setCourses(Set.of(course1, course2)); // o esto otro: student1.getCourses().add(course1); con el set reemplaza la colección entera
+		student2.setCourses(Set.of(course2));
+
+		studentRepository.saveAll(List.of(student1, student2)); // Al guardar los estudiantes se guardan los cursos, porque lo realiza en cascada
+
+		System.out.println(student1);
+		System.out.println(student2);
+
+		// Eliminar un curso
+		Optional<Student> optionalStudentDb = studentRepository.findOneWithCourses(3L); // buscar el estudiante junto con sus cursos, a través de query del repositorio
+
+		if(optionalStudentDb.isPresent())
+		{
+			Student studentDb = optionalStudentDb.get();
+			Optional<Course> optionalCourseDb = courseRepository.findById(3L);
+
+			if(optionalCourseDb.isPresent())
+			{
+				Course CourseDb = optionalCourseDb.get();
+
+				studentDb.getCourses().remove(CourseDb);
+				studentRepository.save(studentDb);
+
+				System.out.println(studentDb);
+			}
+		}
+	}
+
+
+	// Eliminar un objeto dependiente o hijo en relación MANY TO MANY
+	// Pero en vez de crear estudiante y curso, realizar una búsqueda por el id
+	@Transactional
+	public void manyToManyRemoveFind()
+	{
+		Optional<Student> optionalStudent1 = studentRepository.findById(1L);
+		Optional<Student> optionalStudent2 = studentRepository.findById(2L);
+
+		Student student1 = optionalStudent1.get();
+		Student student2 = optionalStudent2.get();
+
+		Course course1 = courseRepository.findById(1L).get();
+		Course course2 = courseRepository.findById(2L).get();
+
+		student1.setCourses(Set.of(course1, course2)); // o esto otro: student1.getCourses().add(course1); con el set reemplaza la colección entera
+		student2.setCourses(Set.of(course2));
+
+		studentRepository.saveAll(List.of(student1, student2)); // Al guardar los estudiantes se guardan los cursos, porque lo realiza en cascada
+
+		System.out.println(student1);
+		System.out.println(student2);
+
+		// Eliminar un curso
+		Optional<Student> optionalStudentDb = studentRepository.findOneWithCourses(1L); // buscar el estudiante junto con sus cursos, a través de query del repositorio
+
+		if(optionalStudentDb.isPresent())
+		{
+			Student studentDb = optionalStudentDb.get();
+			Optional<Course> optionalCourseDb = courseRepository.findById(2L);
+
+			if(optionalCourseDb.isPresent())
+			{
+				Course CourseDb = optionalCourseDb.get();
+
+				studentDb.getCourses().remove(CourseDb);
+				studentRepository.save(studentDb);
+
+				System.out.println(studentDb);
+			}
+		}
 	}
 
 
 	// Relación MANY TO MANY
-	// Crear y guardar detalles de un cliente, crear un cliente, a continuación asignar el cliente el detalle y guardar el cliente
+	// Crear estudiantes y cursos, a continuación asignar al estudiante los cursos y guardar estudiantes
 	// No hay que guardar los cursos antes porque con "cascade" realiza el proceso de guardarlos automáticamente al guardar el estudiante
 	@Transactional
 	public void manyToMany()
@@ -61,6 +148,31 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner
 
 		Course course1 = new Course("Curso de java master", "Andrés");
 		Course course2 = new Course("Curso de Spring Boot", "Andrés");
+
+		student1.setCourses(Set.of(course1, course2)); // o esto otro: student1.getCourses().add(course1); con el set reemplaza la colección entera
+		student2.setCourses(Set.of(course2));
+
+		studentRepository.saveAll(List.of(student1, student2)); // Al guardar los estudiantes se guardan los cursos, porque lo realiza en cascada
+
+		System.out.println(student1);
+		System.out.println(student2);
+	}
+
+
+	// Relación MANY TO MANY
+	// Pero realizando la búsqueda de estudiantes y de cursos por id, a continuación asignar al estudiante los cursos y guardar estudiantes
+	// No hay que guardar los cursos antes porque con "cascade" realiza el proceso de guardarlos automáticamente al guardar el estudiante
+	@Transactional
+	public void manyToManyFindById()
+	{
+		Optional<Student> optionalStudent1 = studentRepository.findById(1L);
+		Optional<Student> optionalStudent2 = studentRepository.findById(2L);
+
+		Student student1 = optionalStudent1.get();
+		Student student2 = optionalStudent2.get();
+
+		Course course1 = courseRepository.findById(1L).get();
+		Course course2 = courseRepository.findById(2L).get();
 
 		student1.setCourses(Set.of(course1, course2)); // o esto otro: student1.getCourses().add(course1); con el set reemplaza la colección entera
 		student2.setCourses(Set.of(course2));
