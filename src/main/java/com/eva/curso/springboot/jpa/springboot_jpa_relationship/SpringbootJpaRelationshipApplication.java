@@ -50,11 +50,152 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner
 
 	@Override
 	public void run(String... args) throws Exception {
-		manyToManyRemove();
+		manyToManyRemoveBidireccionalFindById();
 	}
 
 
-	// Eliminar un objeto dependiente o hijo en relación MANY TO MANY
+	// MANY TO MANY (BIDIRECCIONAL)
+	// ELIMINAR un objeto dependiente o hijo en relación MANY TO MANY
+	// Crear estudiantes y cursos, a continuación asignar al estudiante los cursos y guardar estudiantes
+	@Transactional
+	public void manyToManyBidireccionalRemove()
+	{
+		Student student1 = new Student("Jano", "Pura");
+		Student student2 = new Student("Erba", "Doe");
+
+		Course course1 = new Course("Curso de java master", "Andrés");
+		Course course2 = new Course("Curso de Spring Boot", "Andrés");
+
+		student1.addCourse(course1);
+		student1.addCourse(course2);
+		student2.addCourse(course2);
+
+		studentRepository.saveAll(List.of(student1, student2)); // Al guardar los estudiantes se guardan los cursos, porque lo realiza en cascada
+
+		System.out.println(student1);
+		System.out.println(student2);
+
+		// Eliminar un curso
+		Optional<Student> optionalStudentDb = studentRepository.findOneWithCourses(3L); // buscar el estudiante junto con sus cursos, a través de query del repositorio
+
+		if(optionalStudentDb.isPresent())
+		{
+			Student studentDb = optionalStudentDb.get();
+			Optional<Course> optionalCourseDb = courseRepository.findOneWithStudents(3L);
+
+			if(optionalCourseDb.isPresent())
+			{
+				Course CourseDb = optionalCourseDb.get();
+
+				studentDb.removeCourse(CourseDb);
+				studentRepository.save(studentDb);
+
+				System.out.println(studentDb);
+			}
+		}
+	}
+
+
+	// MANY TO MANY (BIDIRECCIONAL)
+	// ELIMINAR un objeto dependiente o hijo en relación MANY TO MANY
+	// Igual pero BUSCAR estudiantes y cursos por id
+
+	@Transactional
+	public void manyToManyRemoveBidireccionalFindById()
+	{
+		Optional<Student> optionalStudent1 = studentRepository.findOneWithCourses(1L);
+		Optional<Student> optionalStudent2 = studentRepository.findOneWithCourses(2L);
+
+		Student student1 = optionalStudent1.get();
+		Student student2 = optionalStudent2.get();
+
+		Course course1 = courseRepository.findOneWithStudents(1L).get();
+		Course course2 = courseRepository.findOneWithStudents(2L).get();
+
+		// student1.setCourses(Set.of(course1, course2)); // o esto otro: student1.getCourses().add(course1); con el set reemplaza la colección entera
+		// student2.setCourses(Set.of(course2));
+		student1.addCourse(course1);
+		student1.addCourse(course2);
+		student2.addCourse(course2);
+
+		studentRepository.saveAll(List.of(student1, student2)); // Al guardar los estudiantes se guardan los cursos, porque lo realiza en cascada
+
+		System.out.println(student1);
+		System.out.println(student2);
+
+		// Eliminar un curso
+		Optional<Student> optionalStudentDb = studentRepository.findOneWithCourses(1L); // buscar el estudiante junto con sus cursos, a través de query del repositorio
+
+		if(optionalStudentDb.isPresent())
+		{
+			Student studentDb = optionalStudentDb.get();
+			Optional<Course> optionalCourseDb = courseRepository.findOneWithStudents(1L);
+
+			if(optionalCourseDb.isPresent())
+			{
+				Course CourseDb = optionalCourseDb.get();
+
+				studentDb.removeCourse(CourseDb);
+				studentRepository.save(studentDb);
+
+				System.out.println(studentDb);
+			}
+		}
+	}
+
+
+	// MANY TO MANY (BIDIRECCIONAL)
+	// Crear estudiantes y cursos, a continuación asignar al estudiante los cursos y guardar estudiantes
+	// No hay que guardar los cursos antes porque con "cascade" realiza el proceso de guardarlos automáticamente al guardar el estudiante
+	@Transactional
+	public void manyToManyBidireccional()
+	{
+		Student student1 = new Student("Jano", "Pura");
+		Student student2 = new Student("Erba", "Doe");
+
+		Course course1 = new Course("Curso de java master", "Andrés");
+		Course course2 = new Course("Curso de Spring Boot", "Andrés");
+
+		student1.addCourse(course1);
+		student1.addCourse(course2);
+		student2.addCourse(course2);
+
+		studentRepository.saveAll(List.of(student1, student2)); // Al guardar los estudiantes se guardan los cursos, porque lo realiza en cascada
+
+		System.out.println(student1);
+		System.out.println(student2);
+	}
+
+
+	// MANY TO MANY (BIDIRECCIONAL)
+	// Igual pero BUSCAR estudiantes y cursos por id
+	@Transactional
+	public void manyToManyBidireccionalFindById()
+	{
+		Optional<Student> optionalStudent1 = studentRepository.findOneWithCourses(1L);
+		Optional<Student> optionalStudent2 = studentRepository.findOneWithCourses(2L);
+
+		Student student1 = optionalStudent1.get();
+		Student student2 = optionalStudent2.get();
+
+		Course course1 = courseRepository.findOneWithStudents(1L).get();
+		Course course2 = courseRepository.findOneWithStudents(2L).get();
+
+		// student1.setCourses(Set.of(course1, course2)); // o esto otro: student1.getCourses().add(course1); con el set reemplaza la colección entera
+		// student2.setCourses(Set.of(course2));
+		student1.addCourse(course1);
+		student1.addCourse(course2);
+		student2.addCourse(course2);
+
+		studentRepository.saveAll(List.of(student1, student2)); // Al guardar los estudiantes se guardan los cursos, porque lo realiza en cascada
+
+		System.out.println(student1);
+		System.out.println(student2);
+	}
+
+
+	// MANY TO MANY
+	// ELIMINAR un objeto dependiente o hijo
 	// Crear estudiantes y cursos, a continuación asignar al estudiante los cursos y guardar estudiantes
 	@Transactional
 	public void manyToManyRemove()
@@ -94,8 +235,9 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner
 	}
 
 
-	// Eliminar un objeto dependiente o hijo en relación MANY TO MANY
-	// Pero en vez de crear estudiante y curso, realizar una búsqueda por el id
+	// MANY TO MANY
+	// ELIMINAR un objeto dependiente o hijo
+	// Igual pero BUSCAR estudiantes y cursos por id
 	@Transactional
 	public void manyToManyRemoveFind()
 	{
@@ -137,7 +279,7 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner
 	}
 
 
-	// Relación MANY TO MANY
+	// MANY TO MANY
 	// Crear estudiantes y cursos, a continuación asignar al estudiante los cursos y guardar estudiantes
 	// No hay que guardar los cursos antes porque con "cascade" realiza el proceso de guardarlos automáticamente al guardar el estudiante
 	@Transactional
@@ -159,8 +301,8 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner
 	}
 
 
-	// Relación MANY TO MANY
-	// Pero realizando la búsqueda de estudiantes y de cursos por id, a continuación asignar al estudiante los cursos y guardar estudiantes
+	// MANY TO MANY
+	// Igual pero BUSCAR estudiantes y cursos por id
 	// No hay que guardar los cursos antes porque con "cascade" realiza el proceso de guardarlos automáticamente al guardar el estudiante
 	@Transactional
 	public void manyToManyFindById()
@@ -184,7 +326,7 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner
 	}
 
 
-	// Relación Bidireccional ONE TO ONE
+	// ONE TO ONE (BIDIRECCIONAL)
 	// Crear cliente y crear detalles de cliente, a continuación asignar en el cliente el detalle y en el detalle el cliente, guardar el cliente
 	@Transactional
 	public void oneToOneBidireccional()
@@ -202,8 +344,8 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner
 	}
 
 
-	// Relación Bidireccional ONE TO ONE
-	// Pero realizando la búsqueda del cliente por id, crear detalles de cliente, a continuación asignar en el cliente el detalle y en el detalle el cliente, guardar el cliente
+	// ONE TO ONE (BIDIRECCIONAL)
+	// Igual pero BUSCAR cliente por id
 	@Transactional
 	public void oneToOneBidireccionalFindById()
 	{
@@ -221,8 +363,8 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner
 	}
 
 
-	// Relación ONE TO ONE
-	// Crear y guardar detalles de un cliente, crear un cliente, a continuación asignar el cliente el detalle y guardar el cliente
+	// ONE TO ONE
+	// Crear y guardar detalles de un cliente, crear un cliente, a continuación asignar al cliente el detalle y guardar el cliente
 	@Transactional
 	public void oneToOne()
 	{
@@ -237,9 +379,8 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner
 	}
 
 
-	// Relación ONE TO ONE
-	// Pero realizando la búsqueda del cliente por id, crear y guardar detalles de un cliente, a continuación buscamos el cliente, asignamos el detalle y guardar el cliente
-	@Transactional
+	// ONE TO ONE
+	// Igual pero BUSCAR cliente por id
 	public void oneToOneFindById()
 	{
 		ClientDetails clientDetails = new ClientDetails(true, 5000);
@@ -255,9 +396,9 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner
 	}
 
 
-	/* Relación bidireccional 
-	Eliminar un objeto dependiente o hijo en relación OneToMany 
-	Creando el cliente */
+	// ONE TO MANY (BIDIRECCIONAL)
+	// ELIMINAR un objeto dependiente o hijo
+	// Creando el cliente y las facturas
 	@Transactional
 	public void removeInvoiceBidireccional()
 	{
@@ -296,9 +437,9 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner
 	}
 
 
-	/* Relación bidireccional 
-	Eliminar un objeto dependiente o hijo en relación OneToMany 
-	Pero en vez de crear un cliente, realizar una búsqueda por el id */
+	// ONE TO MANY (BIDIRECCIONAL)
+	// ELIMINAR un objeto dependiente o hijo
+	// Igual pero BUSCAR cliente por id
 	@Transactional
 	public void removeInvoiceBidireccionalFindByIdClient()
 	{
@@ -339,9 +480,8 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner
 	}
 
 
-	/* Relación bidireccional 
-	Crear cliente, crear las facturas, al cliente le añadimos las facturas pero a cada factura también hay que añadirle cada cliente y 
-	luego guardamos el cliente */
+	// ONE TO MANY (BIDIRECCIONAL)
+	// Crear cliente, crear las facturas, al cliente le añadimos las facturas pero a cada factura también hay que añadirle el cliente y luego guardamos el cliente
 	@Transactional
 	public void oneToManyInvoiceBidireccional()
 	{
@@ -365,8 +505,8 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner
 	}
 
 
-	/* Relación bidireccional 
-	Pero en vez de crear un cliente, realizar una búsqueda por el id */
+	// ONE TO MANY (BIDIRECCIONAL)
+	// Igual pero BUSCAR cliente por id
 	@Transactional
 	public void oneToManyInvoiceBidireccionalFindByIdClient()
 	{
@@ -392,9 +532,10 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner
 	}
 
 
-	/* Eliminar un objeto dependiente o hijo en relación OneToMany
-	Crear un cliente, crear las direcciones, añadir las direcciones al cliente y guardar el cliente, automáticamente se guardarán
-	también las direcciones. Lo siguiente buscar el cliente por id y eliminar una dirección específica */ 
+	// ONE TO MANY
+	// ELIMINAR un objeto dependiente o hijo
+	// Crear un cliente, crear las direcciones, añadir las direcciones al cliente y guardar el cliente, automáticamente se guardarán también las direcciones. 
+	// Lo siguiente buscar el cliente por id y eliminar una dirección específica */ 
 	@Transactional
 	public void removeAddress()
 	{
@@ -421,9 +562,10 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner
 	}
 
 
-	/* Eliminar un objeto dependiente o hijo en relación OneToMany
-	Buscar un cliente por el id, crear las direcciones, añadir las direcciones al cliente y guardar el cliente, automáticamente se guardarán
-	también las direcciones. Lo siguiente buscar el cliente por id y eliminar una dirección específica */
+	// ONE TO MANY
+	// ELIMINAR un objeto dependiente o hijo
+	// Igual pero BUSCAR cliente por id
+	// Lo siguiente buscar el cliente por id y eliminar una dirección específica
 	@Transactional
 	public void removeAddressFindByIdClient()
 	{
@@ -456,9 +598,9 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner
 	}
 
 
-	/* Crear un cliente, crear las direcciones y agregarlas al cliente, a continuación al guardar el cliente se guardan automáticamente 
-	también las direcciones. 
-	No hay que guardar las direcciones antes porque con "cascade" realiza el proceso de guardarlas automáticamente al guardar el cliente */ 
+	// ONE TO MANY
+	// Crear un cliente, crear las direcciones y agregarlas al cliente, a continuación al guardar el cliente se guardan automáticamente también las direcciones. 
+	// No hay que guardar las direcciones antes porque con "cascade" realiza el proceso de guardarlas automáticamente al guardar el cliente
 	@Transactional
 	public void oneToMany()
 	{
@@ -476,9 +618,9 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner
 	}
 
 
-	/* Buscar un cliente por el id, crear las direcciones y agregarlas al cliente, a continuación al guardar el cliente se guardan automáticamente 
-	también las direcciones.
-	No hay que guardar las direcciones antes porque con "cascade" realiza el proceso de guardarlas automáticamente al guardar el cliente */ 
+	// ONE TO MANY
+	// Igual pero BUSCAR cliente por id
+	// No hay que guardar las direcciones antes porque con "cascade" realiza el proceso de guardarlas automáticamente al guardar el cliente
 	@Transactional
 	public void oneToManyFindByIdClient()
 	{
@@ -500,6 +642,7 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner
 	}
 
 
+	// MANY TO ONE
 	// Crear y guardar un cliente, crear una factura, a continuación asignar el cliente a esa factura y guardar la factura
 	@Transactional
 	public void manyToOne()
@@ -514,7 +657,8 @@ public class SpringbootJpaRelationshipApplication implements CommandLineRunner
 	}
 
 
-	// Buscar un cliente por el id, crear la factura, a continuación asignar el cliente buscado a esa factura y guardar
+	// MANY TO ONE
+	// Igual pero BUSCAR cliente por id
 	@Transactional
 	public void manyToOneFindByIdClient()
 	{

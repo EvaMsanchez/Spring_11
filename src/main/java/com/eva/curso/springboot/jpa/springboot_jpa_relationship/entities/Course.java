@@ -1,9 +1,13 @@
 package com.eva.curso.springboot.jpa.springboot_jpa_relationship.entities;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -16,6 +20,10 @@ public class Course
 
     private String name;
     private String instructor;
+
+    // Relación bidireccional: cada curso tiene muchos estudiantes, y los estudiantes pueden estar apuntados a muchos cursos
+    @ManyToMany(mappedBy = "courses")
+    private Set<Student> students = new HashSet<>();
 
 
     public Course() {}
@@ -44,6 +52,12 @@ public class Course
     public void setInstructor(String instructor) {
         this.instructor = instructor;
     }
+    public Set<Student> getStudents() {
+        return students;
+    }
+    public void setStudents(Set<Student> students) {
+        this.students = students;
+    }  
 
     @Override
     public String toString() {
@@ -89,6 +103,6 @@ public class Course
         } else if (!instructor.equals(other.instructor))
             return false;
         return true;
-    }  
+    }
     
 }
