@@ -8,8 +8,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 @Entity
 @Table(name = "students")
@@ -23,9 +26,14 @@ public class Student
     private String lastname;
 
     // Relación UNIDIRECCIONAL: indicar cual es la clase principal (a partir de una creamos los hijos dependiente)
-    // Clase padre
+    // Clase padre (en este caso se crea tabla intermedia sin personalizar)
     // En este caso NO se puede ELIMINAR los hijos porque los cursos estarán asignados a otros estudiantes, por la relación ManyToMany
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}) // NO se puede CascadeType.ALL
+    // Solo cuando es Many to Many o One to Many(pero aquí sería mejor sin tabla intermedia)
+    @JoinTable(name = "tbl_alumnos_cursos",
+               joinColumns = @JoinColumn(name = "alumno_id"),
+               inverseJoinColumns = @JoinColumn(name = "curso_id"),
+               uniqueConstraints =  @UniqueConstraint(columnNames = {"alumno_id", "curso_id"}))
     private Set<Course> courses = new HashSet<>();
 
     
